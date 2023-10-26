@@ -1,9 +1,21 @@
 # teb_local_planner
-teb local planner without ros, teb 局部路径规划算法，非ROS版本移植，可以自行在项目中当作一个库进行调用
+teb local planner without ros, teb 局部路径规划算法，非ROS版本移植，可以自行在项目中当作一个库进行调用。
+并且考虑了车辆运动学方程，规划与控制形成了闭环，
+其中，具体见附件mp4视频：TEB复杂全局路径失败.mp4
+1.红色全局路径使用随机数生成的，2.绿色线是TEB生成的局部路径，3.蓝色线（若隐若现）是两轮差速小车通过接收TEB局部规划器V和W实时走的路径。快到终点时，TEB有规划了一条绕大圈的路线，然后机器人动不了了。
 
-原始的代码和相关论文请参考原始的teb工程
+
+## Reference
+
+> 
+> Paper:
+> 
+> 原始的代码和相关论文请参考原始的teb工程
 https://github.com/rst-tu-dortmund/teb_local_planner
-
+> Code :
+> https://github.com/rst-tu-dortmund/teb_local_planner
+> 
+> https://github.com/linyicheng1/teb_local_planner
 # 调用流程
 
 ## How to use
@@ -25,7 +37,7 @@ make -j16
 
 ## 代码运行
 
-代码运行成功时，会出现一个窗口和两个滑动条，通过滑动条可以控制起始点和目标点的角度，从而控制轨迹的形状。
+代码运行成功时，如下所示。
 ![example](example.png)
 
 
