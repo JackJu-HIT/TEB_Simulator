@@ -10,24 +10,143 @@
 //#include "/home/juchunyu/20231013/tebNoRos/teb_local_planner/src/matplotlibcpp.h"
 #include "/home/juchunyu/20231013/tebNoRos/teb_local_planner/matplotlib-cpp/matplotlibcpp.h"
 #include <vector>
+#include <Eigen/Dense>
+
 
 namespace plt = matplotlibcpp;//可视化
+
+using namespace Eigen;
 
 using namespace teb_local_planner;
 using namespace std;
 
 int main()
 {
+   
+   /*
+   cv::Mat m4 = cv::imread("/home/juchunyu/20231013/tebNoRos/teb_local_planner/PM.pgm",cv::IMREAD_GRAYSCALE);
+   //cv::Mat m5(m4.size(), m4.type());
+   //m4.convertTo(m5, -1, 0.3, 50);
+   //cout<<mat<<endl;
+   cout << "图像宽为：" << m4.cols << "\t高度为：" << m4.rows << "\t通道数为：" << m4.channels() << endl;
+   for (int r = 0; r < m4.rows; ++r) {
+        for (int c = 0; c < m4.cols; ++c) {
+            int data = m4.at<unsigned char>(r, c);
+            //std::cout << data << std::endl;
+        }
+    }
+    for(int i = 0;i<000;i++){
+        for(int j = 0;j<500;j++){
+             m4.at<unsigned char>(i, j) = 255;
+        }
+    }
+	cv::imshow("res_mat", m4);
+	cv::waitKey(0);
+    */
     // 参数配置
     TebConfig config;
 
+    ViaPointContainer via_points;
+    ViaPointContainer via_points_temp;
+    vector<double> via_points_x;
+    vector<double> via_points_y;
+
+    double max_global_plan_lookahead_dist = 1;
+   
+
+    //add wayPoints
+    double w_sigma =0.02;                 // 噪声Sigma值
+
+    double w_sigma1 = 180/3.14;           // 噪声Sigma值
+    cv::RNG rng;                         // OpenCV随机数产生器
+
+   // via_points.push_back(Eigen::Vector2d(startPoint_x,startPOint_y));
+   // via_points_x.push_back(startPoint_x);
+   // via_points_y.push_back(startPOint_y);
+
+
+    //生成隨幾
+    /*
+    double i = -2;
+    while(i< 11){
+        via_points.push_back( Eigen::Vector2d( i+rng.gaussian ( w_sigma ),rng.gaussian ( w_sigma1 ) ) );
+        via_points_x.push_back(i+rng.gaussian ( w_sigma ));
+        via_points_y.push_back(rng.gaussian ( w_sigma1 ));
+       // cout<<"viaPoints("<<i<<','<<1<<")"<<endl;
+       i = i + 0.05;
+    }
+   */
+   //s曲
+   /*
+   double i = -2;
+   while(i < 11){
+   
+    via_points.push_back( Eigen::Vector2d( i,0.2*sin(i)) );
+    via_points_x.push_back(i);
+    via_points_y.push_back(0.2*sin(i));
+    i = i + 0.05;
+}*/
+/*
+    //u 曲
+    double i = -2;
+    while(i < 3){
+        via_points.push_back( Eigen::Vector2d( i,i*i+7 ));
+        via_points_x.push_back(i);
+        via_points_y.push_back(i*i+7);
+        i = i + 0.05;
+   }
+*/
+  // via_points.clear();
+   /*
+    double i = -2;
+    while(i < 3){
+            via_points.push_back( Eigen::Vector2d( i,5));
+            via_points_x.push_back(i);
+            via_points_y.push_back(5);
+            i = i + 0.05;
+   }
+   cout<<"templeng"<<via_points_x.size()<<endl;
+   double j = 5;
+   while(j>3){
+    via_points.push_back(Eigen::Vector2d(i,j));
+    via_points_x.push_back(i);
+    via_points_y.push_back(j);
+    j = j - 0.05;
+    cout<<"j"<<j<<endl;
+   }
+  */
+
+
+   double i = -2;
+    while(i < 2){
+         if(i<0){
+            via_points.push_back( Eigen::Vector2d( i,-6*i+3));
+            via_points_x.push_back(i);
+            via_points_y.push_back(-6*i+3);
+            i = i + 0.05;
+         } else
+         {
+            via_points.push_back( Eigen::Vector2d( i,6*i+3));
+            via_points_x.push_back(i);
+            via_points_y.push_back(6*i+3);
+             i = i + 0.01;
+         }
+         
+         
+   }
+  for(int i = 0;i<via_points_x.size();i++){
+      cout<<"index ="<<i<<" "<<"("<<via_points_x[i]<<","<<via_points_y[i]<<")"<<endl;
+  }
+
     //startPOint
-    double startPoint_x = -2;
-    double startPOint_y = 1;
-    double endPoint_x   = 10;
-    double endPOint_y   = 1;
+    int size_ = via_points_x.size();
+    double startPoint_x = via_points_x[0];
+    double startPOint_y = via_points_y[0];
+    double endPoint_x   = via_points_x[size_-1];
+    double endPOint_y   = via_points_y[size_-1];
     PoseSE2 start(startPoint_x,startPOint_y,0);
     PoseSE2 end(endPoint_x ,endPOint_y,0);
+  
 
     double r = 0.4;
     
@@ -67,33 +186,10 @@ int main()
 
 
 
-    ViaPointContainer via_points;
-    vector<double> via_points_x;
-    vector<double> via_points_y;
-   
-
-    //add wayPoints
-    double w_sigma = 0.5;                 // 噪声Sigma值
-
-    double w_sigma1 = 1;                 // 噪声Sigma值
-    cv::RNG rng;                        // OpenCV随机数产生器
-
-    via_points.push_back(Eigen::Vector2d(startPoint_x,startPOint_y));
-    via_points_x.push_back(startPoint_x);
-    via_points_y.push_back(startPOint_y);
-    for(int i = -2;i < 11;i++){
-        via_points.push_back( Eigen::Vector2d( i+rng.gaussian ( w_sigma ),rng.gaussian ( w_sigma1 ) ) );
-        via_points_x.push_back(i+rng.gaussian ( w_sigma ));
-        via_points_y.push_back(rng.gaussian ( w_sigma1 ));
-       // cout<<"viaPoints("<<i<<','<<1<<")"<<endl;
-    }
-    via_points.push_back(Eigen::Vector2d(endPoint_x,endPOint_y));
-    via_points_x.push_back(endPoint_x);
-    via_points_y.push_back(endPOint_y);
     // Setup robot shape model
     RobotFootprintModelPtr robot_model = boost::make_shared<CircularRobotFootprint>(r);
     auto visual = TebVisualizationPtr(new TebVisualization(config));
-    auto planner = new TebOptimalPlanner(config, &obst_vector, robot_model, visual, &via_points);
+    //auto planner = new TebOptimalPlanner(config, &obst_vector, robot_model, visual, &via_points);
     //cv::Mat show_map = cv::Mat::zeros(cv::Size(500,500),CV_8UC3);
 
     // param
@@ -111,7 +207,8 @@ int main()
 
     double Robot_x = startPoint_x;
     double Robot_y = startPOint_y;
-    double Robot_theta = start_theta;
+
+    double Robot_theta = atan2f( via_points_y[1]- via_points_y[0], via_points_x[1]- via_points_x[0]);//start_theta;
 
     double global_x = 0;
     double global_y = 0;
@@ -122,38 +219,92 @@ int main()
 
     double ts = 0.1;
     double distToGoal =1000000000;
-
- 
+    int indexPrevious = 0;
+   // cout<<"atan2f(1,2)="<<atan2(1,1)<<endl;
     int show_step = 0;
-    while (distToGoal > 0.01){ 
+    while (distToGoal > 0.1){ 
+           via_points_temp.clear();
            plt::clf();
            show_step ++;
            // start.theta() = start_theta * 0.1;
            // end.theta() = end_theta * 0.1;
            // start.theta() = start_theta;
            //end.theta()   = end_theta;
+            //via_points.push_back( Eigen::Vector2d( i,i*i+7 ));
+            //via_points_x.push_back(i);
+            //via_points_y.push_back(i*i+7);
+            double min_dist = 10000000000;
+            int min_idx = 0;
+            cout<<" via_points_x.size()="<< via_points_x.size()<<endl;
+            for(int i = 0;i < via_points_x.size();i++){
+                double dist = sqrt((via_points_x[i] - Robot_x)*(via_points_x[i] - Robot_x)+ (via_points_y[i] - Robot_y)*(via_points_y[i] - Robot_y));
+                cout<<"idx = "<<i<<"dist = "<<dist<<endl;
+                if(dist<min_dist){
+                    min_dist = dist;
+                    min_idx = i;
+                 }
+                /*
+                if(dist < max_global_plan_lookahead_dist){
+                    min_idx = i;
+                }*/
+            }
+            //Control Robot Only towards
+            //if(indexPrevious > min_idx){
+            //    min_idx = indexPrevious;
+            //}
+            indexPrevious = min_idx;
+            cout<<"min_idx="<<min_idx<<endl;
+            double distNum = 0;
+            double goal_x_temp;
+            double goal_y_temp;
+            double global_theta_temp;
+            int times= 0;
+            for(int i = min_idx;i<via_points_x.size();i++){
+                cout<<"times="<<times<<endl;
+                times++;
+                via_points_temp.push_back(Eigen::Vector2d( via_points_x[i],via_points_y[i]));
+                distNum = sqrt((Robot_x -via_points_x[i])*(Robot_x - via_points_x[i])+ (Robot_y - via_points_y[i])*(Robot_y - via_points_y[i]));
+                if(distNum > max_global_plan_lookahead_dist){//||i >= via_points_x.size()){
+                    //cout<<"index ="<<i<<"goal_x_temp=:"<<goal_x_temp<<"goal_y_temp"<<goal_y_temp<<""
+                    goal_x_temp = via_points_x[i];
+                    goal_y_temp = via_points_y[i];
+                    if((i+1)>via_points_x.size()){
+                    global_theta_temp = atan2l( via_points_y[i]- via_points_y[i-1],via_points_x[i]-via_points_x[i-1]);
+                    }else{
+                         global_theta_temp = atan2l( via_points_y[i+1]- via_points_y[i],via_points_x[i+1]-via_points_x[i]);
+                    }
+                    break;
+                }
+            }
+
+            cout<<"goal_x_temp"<<goal_x_temp<<" "<<"goal_y:"<<goal_y_temp<<"global_theta_temp="<<global_theta_temp<<endl; 
+            cout<<"vRobot_x="<<Robot_x<<"Robot_y="<<Robot_y<<endl;
+            cout<<"endPoint_x = "<<endPoint_x<<"endPOint_y = "<<endPOint_y<<endl;
+            cout<<"v_x="<<v_x<<" "<<"w="<<w<<endl;
+            auto planner = new TebOptimalPlanner(config, &obst_vector, robot_model, visual, &via_points_temp);
             PoseSE2 start_(Robot_x,Robot_y,Robot_theta);
-            planner->plan(start_,end);
+            PoseSE2 end_(goal_x_temp ,goal_y_temp,global_theta_temp);
+            planner->plan(start_,end_);
             std::vector<Eigen::Vector3f> path;
             planner->getFullTrajectory(path);
             planner->getVelocityCommand(v_x,v_y,w,look_ahead_poses);
 
             //Robot Motion model 
-            Robot_theta   = Robot_theta + w * ts;
-            Robot_x       = Robot_x + v_x * cos(Robot_theta) * ts;
-            Robot_y       = Robot_y + v_x * sin(Robot_theta) * ts;
+            Robot_theta   = Robot_theta + w * ts; //+  rng.gaussian ( w_sigma1);;
+            Robot_x       = Robot_x + v_x * cos(Robot_theta) * ts;// + rng.gaussian ( w_sigma );
+            Robot_y       = Robot_y + v_x * sin(Robot_theta) * ts;// + rng.gaussian ( w_sigma );
             
             global_x_arr.push_back(Robot_x);
             global_y_arr.push_back(Robot_y);
-            cout<<"global_x_arr:"<<global_x_arr.size()<<endl;
+            //cout<<"global_x_arr:"<<global_x_arr.size()<<endl;
 
-            cout<<"Robot_x:"<<Robot_x<<endl;
-            cout<<"Robot_y:"<<Robot_y<<endl;
+            //cout<<"Robot_x:"<<Robot_x<<endl;
+            //cout<<"Robot_y:"<<Robot_y<<endl;
             
             
           
-            cout<<"速度指令v_ｘ:"<<v_x<<" "<<"速度指令ｖ_y:"<<v_y<<" " <<"w指令"<<w<<endl;
-            cout<<"路徑長度："<<path.size()<<endl;
+           // cout<<"速度指令v_ｘ:"<<v_x<<" "<<"速度指令ｖ_y:"<<v_y<<" " <<"w指令"<<w<<endl;
+           // cout<<"路徑長度："<<path.size()<<endl;
             for(int i = 0;i < path.size() - 1;i ++)
             {
                 path_x.push_back(path.at(i)[0]);
@@ -232,19 +383,26 @@ int main()
             plt::xlabel("x");
             plt::ylabel("y");
 
-            plt::xlim(-1, 13);
-            plt::xlim(-5, 13);
+            plt::xlim(-10, 18);
+            plt::ylim(-10, 16);
             plt::title("Teb Plan Traj");
             plt::legend();
             plt::pause(0.0001);
                // plt::show();
 
             distToGoal = sqrt((Robot_x - endPoint_x) * (Robot_x - endPoint_x) + ((Robot_y - endPOint_y)*(Robot_y - endPOint_y)));
+            //cout<<"RObot_x:"<<Robot_x<<" "<<"Robot_y:"<<Robot_y<<endl;
+            //cout<<"endPoint_x:"<<endPoint_x<<" "<<"endPoint_y:"<<endPOint_y<<endl;
+
+
+
                
-            if(distToGoal < 0.01){
+            if(distToGoal < 0.10){
                 plt::show();
             }
            // plt::pause(0.0001);
+          // cout<<"distTOGoal:"<<distToGoal<<endl;
+          
             
 
     }
